@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudo de Francês - Prática Oral</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 16px;
+            padding: 25px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .counter {
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .phrase-pt {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffcc00;
+            border-bottom: 1px solid #333;
+            padding-bottom: 12px;
+        }
+        .phrase-fr {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .phrase-pronun {
+            font-size: 1.1rem;
+            color: #80e5ff;
+            font-style: italic;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            background-color: #2b2b2b;
+            color: white;
+            border: 2px solid #444;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button:active {
+            background-color: #444;
+        }
+        .btn-audio {
+            background-color: #0055ff;
+            border-color: #3377ff;
+            font-size: 1.1rem;
+        }
+        .btn-speed {
+            background-color: #212121;
+            border-color: #555;
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="counter" id="counter">Frase 1 de 100</div>
+        <div class="phrase-pt" id="pt-text">Carregando...</div>
+        <div class="phrase-fr" id="fr-text">Chargement...</div>
+        <div class="phrase-pronun" id="pronun-text">...</div>
+        
+        <div class="controls">
+            <button class="btn-audio" onclick="speakPhrase()">Ouvir Áudio 🔊</button>
+            <button class="btn-speed" id="speed-btn" onclick="toggleSpeed()">Velocidade: Normal (1x)</button>
+            <div class="btn-row">
+                <button onclick="prevCard()">Anterior</button>
+                <button onclick="nextCard()">Próxima</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const frases = [
+            { pt: "Como vão as coisas?", fr: "Comment ça va?", pronun: "Komã sá vá?" },
+            { pt: "Bom dia, tudo bem?", fr: "Bonjour, ça va?", pronun: "Bõ-jôur, sá vá?" },
+            { pt: "Muito obrigado.", fr: "Merci beaucoup.", pronun: "Mér-sí bôu-cú." },
+            { pt: "Até logo!", fr: "À bientôt!", pronun: "A biã-tô!" },
+            { pt: "Eu não entendo.", fr: "Je ne comprends pas.", pronun: "Jê nê comprã pa." },
+            { pt: "Você fala inglês?", fr: "Vous parlez anglais?", pronun: "Vu par-lé ã-glé?" },
+            { pt: "Onde fica o banheiro?", fr: "Où sont les toilettes?", pronun: "Ú sô lê twa-lét?" },
+            { pt: "Quanto custa isso?", fr: "Combien ça coûte?", pronun: "Cõ-biã sá cút?" },
+            { pt: "Eu gostaria de um café.", fr: "Je voudrais un café.", pronun: "Jê vú-dré ã ca-fé." },
+            { pt: "Desculpe-me.", fr: "Excusez-moi.", pronun: "Ex-kiu-zé mwa." },
+            { pt: "Por favor.", fr: "S'il vous plaît.", pronun: "Sil vu plé." },
+            { pt: "Com licença.", fr: "Pardon / S'il vous plaît.", pronun: "Par-dõ / Sil vu plé." },
+            { pt: "Prazer em conhecê-lo.", fr: "Enchanté de faire votre connaissance.", pronun: "ã-shã-té dë fêtr votr co-nè-sãss." },
+            { pt: "Como você se chama?", fr: "Comment vous vous appelez?", pronun: "Comã vu vu za-plé?" },
+            { pt: "Meu nome é...", fr: "Je m'appelle...", pronun: "Jê ma-pèl..." },
+            { pt: "De onde você é?", fr: "D'où venez-vous?", pronun: "Du vë-né vu?" },
+            { pt: "Eu sou do Brasil.", fr: "Je viens du Brésil.", pronun: "Jê vi-ã dü Bré-zil." },
+            { pt: "Eu estou aprendendo francês.", fr: "J'apprends le français.", pronun: "Ja-prã lë frã-sê." },
+            { pt: "Você pode repetir, por favor?", fr: "Pouvez-vous répéter, s'il vous plaît?", pronun: "Pu-vé vu ré-pé-té, sil vu plé?" },
+            { pt: "Fale mais devagar, por favor.", fr: "Parlez plus lentement, s'il vous plaît.", pronun: "Par-lé plu lãt-mãt, sil vu plé?" },
+            { pt: "O que isso significa?", fr: "Qu'est-ce que cela signifie?", pronun: "Kès kë së-la si-ni-fi?" },
+            { pt: "Eu não sei.", fr: "Je ne sais pas.", pronun: "Jê nê sé pa." },
+            { pt: "Sim, um pouco.", fr: "Oui, un peu.", pronun: "Ui, ã pö." },
+            { pt: "Não, absolutamente não.", fr: "Non, pas du tout.", pronun: "Nõ, pa dü tu." },
+            { pt: "Até logo!", fr: "À tout à l'heure!", pronun: "A tu ta lör!" },
+            { pt: "Bom dia!", fr: "Bonjour !", pronun: "Bõ-jôur !" },
+            { pt: "Boa tarde!", fr: "Bon après-midi !", pronun: "Bõ a-pré-mi-di !" },
+            { pt: "Boa noite!", fr: "Bonsoir !", pronun: "Bõ-swar !" },
+            { pt: "Boa noite (para dormir)", fr: "Bonne nuit !", pronun: "Bon nui !" },
+            { pt: "Tchau, boa noite!", fr: "Salut, bonne soirée !", pronun: "Sa-lü, bon swa-ré !" },
+            { pt: "Até amanhã!", fr: "À demain !", pronun: "A dë-mã !" },
+            { pt: "Tenha um bom dia!", fr: "Passez une bonne journée !", pronun: "Pa-sé ün bon jor-né !" },
+            { pt: "Até logo (outro dia)!", fr: "À la prochaine !", pronun: "A la pro-shèn !" },
+            { pt: "Bem-vindo!", fr: "Bienvenue !", pronun: "Biã-vö-nü !" },
+            { pt: "Obrigado pela ajuda.", fr: "Merci pour votre aide.", pronun: "Mér-sí pur votr èd." },
+            { pt: "De nada.", fr: "De rien.", pronun: "Dë ri-ã." },
+            { pt: "Com prazer.", fr: "Avec plaisir.", pronun: "A-vèc plè-zir." },
+            { pt: "Não há de quê.", fr: "Il n'y a pas de quoi.", pronun: "Il ni a pa dë kwa." },
+            { pt: "Com licença para passar.", fr: "Pardon, laissez-moi passer.", pronun: "Par-dõ, lé-sé mwa pa-sé." },
+            { pt: "Me desculpe pelo atraso.", fr: "Excusez-moi pour le retard.", pronun: "Ex-kiu-zé mwa pur lë rë-tar." },
+            { pt: "Sem problemas.", fr: "Pas de souci.", pronun: "Pa dë su-si." },
+            { pt: "Tudo bem / Está certo.", fr: "D'accord.", pronun: "Da-cor." },
+            { pt: "Perfeito!", fr: "Parfait !", pronun: "Par-fè !" },
+            { pt: "Excelente!", fr: "Excellent !", pronun: "Ek-sè-lãt !" },
+            { pt: "Legal / Bacana!", fr: "Chouette / Cool !", pronun: " Shu-èt / Cul !" },
+            { pt: "Que pena!", fr: "Quel dommage !", pronun: "Kèl do-maj !" },
+            { pt: "Tenho certeza.", fr: "J'en suis sûr.", pronun: "Jã sui sür." },
+            { pt: "Acho que sim.", fr: "Je crois que oui.", pronun: "Jê krwa kë ui." },
+            { pt: "Acho que não.", fr: "Je crois que non.", pronun: "Jê krwa kë nõ." },
+            { pt: "Talvez.", fr: "Peut-être.", pronun: "Pöt-ètr." },
+            { pt: "Onde fica a estação?", fr: "Où est la station?", pronun: "Ú è la sta-siõ?" },
+            { pt: "Onde fica o hotel?", fr: "Où se trouve l'hôtel?", pronun: "Ú së truv lo-tèl?" },
+            { pt: "Como chego lá?", fr: "Comment y aller?", pronun: "Comã i a-lé?" },
+            { pt: "Vire à direita.", fr: "Tournez à droite.", pronun: "Tur-né a drwat." },
+            { pt: "Vire à esquerda.", fr: "Tournez à gauche.", pronun: "Tur-né a gauche." },
+            { pt: "Siga em frente.", fr: "Allez tout droit.", pronun: "A-lé tu drwat." },
+            { pt: "É perto daqui?", fr: "C'est près d'ici?", pronun: "Sè prè di-si?" },
+            { pt: "É longe daqui?", fr: "C'est loin d'ici?", pronun: "Sè lwã di-si?" },
+            { pt: "Preciso de um táxi.", fr: "J'ai besoin d'un taxi.", pronun: "Jè bë-zwen dã tak-si." },
+            { pt: "Quanto tempo leva?", fr: "Combien de temps ça prend?", pronun: "Cõ-biã dë tã sá prã?" },
+            { pt: "Quanto custa a passagem?", fr: "Combien coûte le billet?", pronun: "Cõ-biã cút lë bi-jè?" },
+            { pt: "Eu quero ir para lá.", fr: "Je veux y aller.", pronun: "Jê vö i a-lé." },
+            { pt: "Onde posso comer algo?", fr: "Où puis-je manger quelque chose?", pronun: "Ú pui-jë mã-jé kèl-kë choz?" },
+            { pt: "Estou com fome.", fr: "J'ai faim.", pronun: "Jè fã." },
+            { pt: "Estou com sede.", fr: "J'ai soif.", pronun: "Jè swaf." },
+            { pt: "A conta, por favor.", fr: "L'addition, s'il vous plaît.", pronun: "La-di-siõ, sil vu plé." },
+            { pt: "Aceita cartão?", fr: "Vous acceptez la carte?", pronun: "Vu ak-sèp-té la cart?" },
+            { pt: "Estou apenas olhando.", fr: "Je regarde seulement.", pronun: "Jê rë-gard söl-mã." },
+            { pt: "É muito caro.", fr: "C'est trop cher.", pronun: "Sè tro shèr." },
+            { pt: "Tem mais barato?", fr: "Vous avez moins cher?", pronun: "Vu a-vé mwã shèr?" },
+            { pt: "Eu levo este.", fr: "Je prends celui-ci.", pronun: "Jê prã së-lui-si." },
+            { pt: "Que horas são?", fr: "Quelle heure est-il?", pronun: "Kèl ör è-til?" },
+            { pt: "Hoje é que dia?", fr: "Quel jour sommes-nous?", pronun: "Kèl jour som-nu?" },
+            { pt: "Está fazendo calor hoje.", fr: "Il fait chaud aujourd'hui.", pronun: "Il fè sho o-jour-dui." },
+            { pt: "Está fazendo frio.", fr: "Il fait froid.", pronun: "Il fè frwa." },
+            { pt: "Está chovendo.", fr: "Il pleut.", pronun: "Il plö." },
+            { pt: "Faz sol.", fr: "Il y a du soleil.", pronun: "Il i a dü so-lèy." },
+            { pt: "O que você está fazendo?", fr: "Qu'est-ce que tu fais?", pronun: "Kès kë tü fè?" },
+            { pt: "Estou trabalhando.", fr: "Je travaille.", pronun: "Jê tra-vay." },
+            { pt: "Estou descansando.", fr: "Je me repose.", pronun: "Jê më rë-poz." },
+            { pt: "Estou estudando.", fr: "J'étudie.", pronun: "Jé-tü-di." },
+            { pt: "Preciso de ajuda.", fr: "J'ai besoin d'aide.", pronun: "Jè bë-zwen dèd." },
+            { pt: "Pode me ajudar?", fr: "Pouvez-vous m'aider?", pronun: "Pu-vé vu mè-dé?" },
+            { pt: "Socorro / Ajuda!", fr: "Au secours !", pronun: "O së-cur !" },
+            { pt: "Cuidado!", fr: "Attention !", pronun: "A-tã-siõ !" },
+            { pt: "Onde fica o hospital?", fr: "Où est l'hôpital?", pronun: "Ú è lo-pi-tal?" },
+            { pt: "Chame a polícia!", fr: "Appelez la police !", pronun: "A-pë-lé la po-lis !" },
+            { pt: "Perdi meu passaporte.", fr: "J'ai perdu mon passeport.", pronun: "Jè pèr-dü mõ pas-port." },
+            { pt: "Estou perdido.", fr: "Je suis perdu.", pronun: "Jê sui pèr-dü." },
+            { pt: "Não se preocupe.", fr: "Ne vous inquiétez pas.", pronun: "Në vu zã-kié-té pa." },
+            { pt: "Tudo bem / Sem problemas.", fr: "Ce n'est rien.", pronun: "Së nè ri-ã." },
+            { pt: "Até logo mais.", fr: "À plus tard.", pronun: "A plu tar." },
+            { pt: "Boa sorte!", fr: "Bonne chance !", pronun: "Bon shãns !" },
+            { pt: "Comemorei muito.", fr: "J'ai beaucoup fêté.", pronun: "Jè bôu-cú fè-té." },
+            { pt: "Eu amo viajar.", fr: "J'adore voyager.", pronun: "Ja-dor vwa-ya-jé." },
+            { pt: "Quero aprender mais.", fr: "Je veux apprendre plus.", pronun: "Jê vö a-prãdr plu." },
+            { pt: "A vida é bela.", fr: "La vie est belle.", pronun: "La vi è bèl." },
+            { pt: "Até a próxima!", fr: "À la prochaine fois !", pronun: "A la pro-shèn fwa !" },
+            { pt: "Tchau!", fr: "Salut !", pronun: "Sa-lü !" },
+            { pt: "Boa viagem!", fr: "Bon voyage !", pronun: "Bõ vwa-yaj !" }
+        ];
+
+        let currentIndex = 0;
+        let currentRate = 1.0; // Velocidade normal
+
+        const ptEl = document.getElementById("pt-text");
+        const frEl = document.getElementById("fr-text");
+        const pronunEl = document.getElementById("pronun-text");
+        const counterEl = document.getElementById("counter");
+        const speedBtn = document.getElementById("speed-btn");
+
+        function updateCard() {
+            const current = frases[currentIndex];
+            ptEl.textContent = current.pt;
+            frEl.textContent = current.fr;
+            pronunEl.textContent = current.pronun;
+            counterEl.textContent = `Frase ${currentIndex + 1} de ${frases.length}`;
+        }
+
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % frases.length;
+            updateCard();
+        }
+
+        function prevCard() {
+            currentIndex = (currentIndex - 1 + frases.length) % frases.length;
+            updateCard();
+        }
+
+        function toggleSpeed() {
+            if (currentRate === 1.0) {
+                currentRate = 0.7; // Velocidade lenta
+                speedBtn.textContent = "Velocidade: Lenta (0.7x)";
+            } else if (currentRate === 0.7) {
+                currentRate = 0.4; // Bem devagar
+                speedBtn.textContent = "Velocidade: Bem Lenta (0.4x)";
+            } else {
+                currentRate = 1.0; // Volta ao normal
+                speedBtn.textContent = "Velocidade: Normal (1x)";
+            }
+        }
+
+        function speakPhrase() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(frases[currentIndex].fr);
+                utterance.lang = 'fr-FR';
+                utterance.rate = currentRate;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
