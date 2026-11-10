@@ -19,7 +19,7 @@
         button { background-color: #2b2b2b; color: white; border: 2px solid #444; padding: 10px 18px; border-radius: 10px; font-size: 0.95rem; cursor: pointer; font-weight: bold; }
         button:active { background-color: #3b3b3b; }
         #btn-mic { background-color: #0056b3; border-color: #007bff; }
-        #feedback { font-size: 1rem; font-weight: bold; min-height: 25px; }
+        #feedback { font-size: 0.95rem; font-weight: bold; min-height: 40px; line-height: 1.4; text-align: left; background: #252525; padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -83,7 +83,7 @@
             { pt: "Eu estou com sede.", fr: "J'ai soif.", fonetica: "Jê suaf." },
             { pt: "A comida está deliciosa.", fr: "La nourriture est délicieuse.", fonetica: "La nu-ri-tur ê dé-li-siuz." },
             { pt: "A conta, por favor.", fr: "L'addition, s'il vous plaît.", fonetica: "La-di-sion, si vu plê." },
-            { pt: "Aceita cartão de crédito?", fr: "Aceprez-vous les cartes de crédit ?", fonetica: "Ac-sep-té-vu lê cart de cré-dit?" },
+            { pt: "Aceita cartão de crédito?", fr: "Acceptez-vous les cartes de crédit ?", fonetica: "Ac-sep-té-vu lê cart de cré-dit?" },
             { pt: "Onde posso comprar um bilhete?", fr: "Où puis-je acheter un billet ?", fonetica: "U pui-j a-shé-té un bi-yêt?" },
             { pt: "O trem está atrasado.", fr: "Le train est en retard.", fonetica: "Le train êt en re-tar." },
             { pt: "Onde fica o hotel?", fr: "Où se trouve l'hôtel ?", fonetica: "U se truv lo-têl?" },
@@ -93,7 +93,7 @@
             { pt: "Minha bateria acabou.", fr: "Ma batterie est vide.", fonetica: "Ma ba-tri êt vid." },
             { pt: "Você pode repetir?", fr: "Pouvez-vous répéter ?", fonetica: "Pu-vé vu ré-pé-té?" },
             { pt: "Eu entendi.", fr: "J'ai compris.", fonetica: "Jé com-pri." },
-            { pt: "Eu não entendi nada.", fr: "Je n'ai rien compris." , fonetica: "Je n-ê rien com-pri." },
+            { pt: "Eu não entendi nada.", fr: "Je n'ai rien compris.", fonetica: "Je n-ê rien com-pri." },
             { pt: "Como se diz isso em francês?", fr: "Comment dit-on cela en français ?", fonetica: "Com-mon di-ton se-la on fron-sê?" },
             { pt: "Tenha um bom dia!", fr: "Bonne journée !", fonetica: "Bon jurnê!" },
             { pt: "Boa Noite!", fr: "Bonne nuit !", fonetica: "Bon n-ui!" },
@@ -192,18 +192,23 @@
             
             recognition.onresult = function(event) {
                 const dito = event.results[0][0].transcript.toLowerCase().trim();
-                const esperado = frases[atual].fr.toLowerCase().replace(/[^a-zà-ÿ]/g, "");
-                const ditoLimpo = dito.replace(/[^a-zà-ÿ]/g, "");
                 
-                if (ditoLimpo.includes(esperado) || esperado.includes(ditoLimpo)) {
+                const esperadoNormalizado = frases[atual].fr.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
+                const ditoNormalizado = dito.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
+                
+                if (ditoNormalizado.length > 0 && (esperadoNormalizado.includes(ditoNormalizado) || ditoNormalizado.includes(esperadoNormalizado) || ditoNormalizado === esperadoNormalizado)) {
                     document.getElementById("feedback").innerHTML = "✅ <span style='color: #28a745;'>Correto! Perfeito!</span>";
                 } else {
-                    document.getElementById("feedback").innerHTML = `❌ <span style='color: #dc3545;'>Você disse: "${dito}". Tente novamente!</span>`;
+                    document.getElementById("feedback").innerHTML = `❌ <span style='color: #dc3545;'>Você disse: "${dito}"</span><br>` +
+                                                                  `<span style='color: #ffcc00;'>Frase certa:</span> ${frases[atual].fr}<br>` +
+                                                                  `<span style='color: #00d2ff;'>💡 Tente falar assim:</span> ${frases[atual].fonetica}`;
                 }
             };
+            
             recognition.onerror = function() {
                 document.getElementById("feedback").innerText = "Não reconheci o áudio. Tente de novo.";
             };
+            
             recognition.start();
         }
 
