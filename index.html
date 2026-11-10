@@ -11,7 +11,10 @@
         .counter { font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         .phrase-pt { font-size: 1.3rem; font-weight: bold; color: #ffcc00; border-bottom: 1px solid #333; padding-bottom: 12px; }
         .phrase-fr { font-size: 1.5rem; font-weight: bold; color: #ffffff; }
-        .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .speed-controls { display: flex; justify-content: center; gap: 5px; margin: 5px 0; }
+        .speed-btn { background-color: #333; border: 1px solid #555; color: #ccc; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+        .speed-btn.active { background-color: #007bff; border-color: #0056b3; color: white; font-weight: bold; }
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 5px; }
         button { background-color: #2b2b2b; color: white; border: 2px solid #444; padding: 12px 20px; border-radius: 10px; font-size: 1rem; cursor: pointer; font-weight: bold; }
         button:active { background-color: #3b3b3b; }
         #btn-mic { background-color: #0056b3; border-color: #007bff; }
@@ -24,6 +27,12 @@
         <div class="phrase-pt" id="phrase-pt">Carregando frase...</div>
         <div class="phrase-fr" id="phrase-fr">...</div>
         
+        <div class="speed-controls">
+            <button class="speed-btn" onclick="mudarVelocidade(0.5, this)">0.5x</button>
+            <button class="speed-btn active" onclick="mudarVelocidade(1.0, this)">1.0x</button>
+            <button class="speed-btn" onclick="mudarVelocidade(1.25, this)">1.25x</button>
+        </div>
+
         <div class="controls">
             <button onclick="ouvirAudio()">🔊 Ouvir Frase</button>
             <button id="btn-mic" onclick="falarFrase()">🎤 Falar Pronúncia</button>
@@ -33,6 +42,8 @@
     </div>
 
     <script>
+        let velocidadeAtual = 1.0;
+
         const frases = [
             { pt: "Bom dia, como você está?", fr: "Bonjour, comment ça va ?" },
             { pt: "Eu gostaria de um café, por favor.", fr: "Je voudrais un café, s'il vous plaît." },
@@ -63,7 +74,7 @@
             { pt: "Eu trabalho com máquinas pesadas.", fr: "Je travaille avec des machines lourdes." },
             { pt: "Tenho uma família maravilhosa.", fr: "J'ai une famille merveilleuse." },
             { pt: "Nós vamos nos mudar em breve.", fr: "Nous allons bientôt déménager." },
-            { pt: "Eu gosto de jogar videogame.", fr: " j'aime jouer aux jeux vidéo." },
+            { pt: "Eu gosto de jogar videogame.", fr: "J'aime jouer aux jeux vidéo." },
             { pt: "Qual é a hora?", fr: "Quelle heure est-il ?" },
             { pt: "São duas horas.", fr: "Il est deux heures." },
             { pt: "Eu estou com fome.", fr: "J'ai faim." },
@@ -109,7 +120,7 @@
             { pt: "Tenha uma boa viagem.", fr: "Bon voyage." },
             { pt: "Até a próxima.", fr: "Jusqu'à la prochaine." },
             { pt: "Eu amo estudar idiomas.", fr: "J'adore étudier les langues." },
-            { pt: "A prática leva à perfeição.", fr: "C'est en forging qu'on devient forgeron." },
+            { pt: "A prática leva à perfeição.", fr: "C'est en forgeant qu'on devient forgeron." },
             { pt: "A vida é bela.", fr: "La vie est belle." },
             { pt: "Nunca desista.", fr: "N'abandonnez jamais." },
             { pt: "Tente outra vez.", fr: "Essayez encore." },
@@ -145,9 +156,16 @@
             document.getElementById("feedback").innerText = "";
         }
 
+        function mudarVelocidade(vel, elemento) {
+            velocidadeAtual = vel;
+            document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
+        }
+
         function ouvirAudio() {
             const texto = new SpeechSynthesisUtterance(frases[atual].fr);
             texto.lang = "fr-FR";
+            texto.rate = velocidadeAtual;
             window.speechSynthesis.speak(texto);
         }
 
