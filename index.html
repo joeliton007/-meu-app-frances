@@ -7,18 +7,19 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #121212; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-        .card { background-color: #1e1e1e; border-radius: 16px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: center; display: flex; flex-direction: column; gap: 15px; }
-        .counter { font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .phrase-pt { font-size: 1.3rem; font-weight: bold; color: #ffcc00; border-bottom: 1px solid #333; padding-bottom: 12px; }
-        .phrase-fr { font-size: 1.5rem; font-weight: bold; color: #ffffff; }
-        .speed-controls { display: flex; justify-content: center; gap: 5px; margin: 5px 0; }
-        .speed-btn { background-color: #333; border: 1px solid #555; color: #ccc; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+        .card { background-color: #1e1e1e; border-radius: 16px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: center; display: flex; flex-direction: column; gap: 12px; }
+        .counter { font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .phrase-pt { font-size: 1.2rem; font-weight: bold; color: #ffcc00; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .phrase-fr { font-size: 1.4rem; font-weight: bold; color: #ffffff; }
+        .phrase-fonetica { font-size: 0.95rem; color: #00d2ff; font-style: italic; background: rgba(0,210,255,0.08); padding: 6px; border-radius: 6px; }
+        .speed-controls { display: flex; justify-content: center; gap: 5px; margin: 2px 0; }
+        .speed-btn { background-color: #333; border: 1px solid #555; color: #ccc; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
         .speed-btn.active { background-color: #007bff; border-color: #0056b3; color: white; font-weight: bold; }
-        .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 5px; }
-        button { background-color: #2b2b2b; color: white; border: 2px solid #444; padding: 12px 20px; border-radius: 10px; font-size: 1rem; cursor: pointer; font-weight: bold; }
+        .controls { display: flex; flex-direction: column; gap: 8px; margin-top: 2px; }
+        button { background-color: #2b2b2b; color: white; border: 2px solid #444; padding: 10px 18px; border-radius: 10px; font-size: 0.95rem; cursor: pointer; font-weight: bold; }
         button:active { background-color: #3b3b3b; }
         #btn-mic { background-color: #0056b3; border-color: #007bff; }
-        #feedback { font-size: 1.1rem; font-weight: bold; min-height: 30px; }
+        #feedback { font-size: 1rem; font-weight: bold; min-height: 25px; }
     </style>
 </head>
 <body>
@@ -26,6 +27,7 @@
         <div class="counter" id="counter">Frase 1 / 100</div>
         <div class="phrase-pt" id="phrase-pt">Carregando frase...</div>
         <div class="phrase-fr" id="phrase-fr">...</div>
+        <div class="phrase-fonetica" id="phrase-fonetica">...</div>
         
         <div class="speed-controls">
             <button class="speed-btn" onclick="mudarVelocidade(0.5, this)">0.5x</button>
@@ -34,7 +36,7 @@
         </div>
 
         <div class="controls">
-            <button onclick="ouvirAudio()">🔊 Ouvir Frase</button>
+            <button onclick="ouvirAudio()">🔊 Ouvir Frase (2x)</button>
             <button id="btn-mic" onclick="falarFrase()">🎤 Falar Pronúncia</button>
             <button onclick="proximaFrase()">Próxima ➡️</button>
         </div>
@@ -45,106 +47,106 @@
         let velocidadeAtual = 1.0;
 
         const frases = [
-            { pt: "Bom dia, como você está?", fr: "Bonjour, comment ça va ?" },
-            { pt: "Eu gostaria de um café, por favor.", fr: "Je voudrais un café, s'il vous plaît." },
-            { pt: "Muito obrigado pela ajuda.", fr: "Merci beaucoup pour votre aide." },
-            { pt: "Onde fica a estação de metrô?", fr: "Où se trouve la station de métro ?" },
-            { pt: "Eu não entendo francês muito bem.", fr: "Je ne comprends pas très bien le français." },
-            { pt: "Você pode falar mais devagar?", fr: "Pouvez-vous parler plus lentement ?" },
-            { pt: "Quanto custa este item?", fr: "Combien ça coûte ?" },
-            { pt: "Eu sou do Brasil.", fr: "Je viens du Brésil." },
-            { pt: "Prazer em conhecê-lo.", fr: "Enchanté de faire votre connaissance." },
-            { pt: "Até logo, tenha um bom dia!", fr: "À bientôt, passez une bonne journée !" },
-            { pt: "Onde fica o banheiro?", fr: "Où sont les toilettes ?" },
-            { pt: "Eu preciso de ajuda.", fr: "J'ai besoin d'aide." },
-            { pt: "Desculpe pelo incômodo.", fr: "Désolé pour le dérangement." },
-            { pt: "Sim, por favor.", fr: "Oui, s'il vous plaît." },
-            { pt: "Não, obrigado.", fr: "Non, merci." },
-            { pt: "Eu não sei.", fr: "Je ne sais pas." },
-            { pt: "Você fala inglês?", fr: "Parlez-vous anglais ?" },
-            { pt: "Eu estou aprendendo francês.", fr: "J'apprends le français." },
-            { pt: "O tempo está ótimo hoje.", fr: "Il fait très beau aujourd'hui." },
-            { pt: "Está chovendo muito.", fr: "Il pleut beaucoup." },
-            { pt: "Qual é o seu nome?", fr: "Comment vous appelez-vous ?" },
-            { pt: "Meu nome é...", fr: "Je m'appelle..." },
-            { pt: "Onde você mora?", fr: "Où habitez-vous ?" },
-            { pt: "Eu moro em Curitiba.", fr: "J'habite à Curitiba." },
-            { pt: "O que você faz da vida?", fr: "Que faites-vous dans la vie ?" },
-            { pt: "Eu sou motorista.", fr: "Je suis chauffeur." },
-            { pt: "Eu trabalho com máquinas pesadas.", fr: "Je travaille avec des machines lourdes." },
-            { pt: "Tenho uma família maravilhosa.", fr: "J'ai une famille merveilleuse." },
-            { pt: "Nós vamos nos mudar em breve.", fr: "Nous allons bientôt déménager." },
-            { pt: "Eu gosto de jogar videogame.", fr: "J'aime jouer aux jeux vidéo." },
-            { pt: "Qual é a hora?", fr: "Quelle heure est-il ?" },
-            { pt: "São duas horas.", fr: "Il est deux heures." },
-            { pt: "Eu estou com fome.", fr: "J'ai faim." },
-            { pt: "Eu estou com sede.", fr: "J'ai soif." },
-            { pt: "A comida está deliciosa.", fr: "La nourriture est délicieuse." },
-            { pt: "A conta, por favor.", fr: "L'addition, s'il vous plaît." },
-            { pt: "Aceita cartão de crédito?", fr: "Acceptez-vous les cartes de crédit ?" },
-            { pt: "Onde posso comprar um bilhete?", fr: "Où puis-je acheter un billet ?" },
-            { pt: "O trem está atrasado.", fr: "Le train est en retard." },
-            { pt: "Onde fica o hotel?", fr: "Où se trouve l'hôtel ?" },
-            { pt: "Eu reservei um quarto.", fr: "J'ai réservé une chambre." },
-            { pt: "O Wi-Fi é gratuito?", fr: "Le Wi-Fi est-il gratuit ?" },
-            { pt: "Qual é a senha?", fr: "Quel est le mot de passe ?" },
-            { pt: "Minha bateria acabou.", fr: "Ma batterie est vide." },
-            { pt: "Você pode repetir?", fr: "Pouvez-vous répéter ?" },
-            { pt: "Eu entendi.", fr: "J'ai compris." },
-            { pt: "Eu não entendi nada.", fr: "Je n'ai rien compris." },
-            { pt: "Como se diz isso em francês?", fr: "Comment dit-on cela en français ?" },
-            { pt: "Tenha um bom dia!", fr: "Bonne journée !" },
-            { pt: "Boa Noite!", fr: "Bonne nuit !" },
-            { pt: "Até logo!", fr: "À plus tard !" },
-            { pt: "Até amanhã!", fr: "À demain !" },
-            { pt: "Com licença.", fr: "Excusez-moi." },
-            { pt: "Com licença (passagem).", fr: "Pardon." },
-            { pt: "Tudo bem?", fr: "Ça va ?" },
-            { pt: "Tudo bem, e com você?", fr: "Ça va bien, et vous ?" },
-            { pt: "Mais ou menos.", fr: "Comme ci, comme ça." },
-            { pt: "Até mais!", fr: "Salut !" },
-            { pt: "Bem-vindo!", fr: "Bienvenue !" },
-            { pt: "Parabéns!", fr: "Félicitations !" },
-            { pt: "Boa sorte!", fr: "Bonne chance !" },
-            { pt: "Cuidado!", fr: "Attention !" },
-            { pt: "Pare!", fr: "Arrêtez !" },
-            { pt: "Venha aqui.", fr: "Venez ici." },
-            { pt: "Espere um momento.", fr: "Attendez un moment." },
-            { pt: "Vamos lá!", fr: "Allons-y !" },
-            { pt: "Estou pronto.", fr: "Je suis prêt." },
-            { pt: "Está certo.", fr: "C'est bon." },
-            { pt: "Está errado.", fr: "C'est faux." },
-            { pt: "Perfeito!", fr: "Parfait !" },
-            { pt: "Excelente!", fr: "Excellent !" },
-            { pt: "Obrigado pelo seu tempo.", fr: "Merci pour votre temps." },
-            { pt: "Tenha uma boa viagem.", fr: "Bon voyage." },
-            { pt: "Até a próxima.", fr: "Jusqu'à la prochaine." },
-            { pt: "Eu amo estudar idiomas.", fr: "J'adore étudier les langues." },
-            { pt: "A prática leva à perfeição.", fr: "C'est en forgeant qu'on devient forgeron." },
-            { pt: "A vida é bela.", fr: "La vie est belle." },
-            { pt: "Nunca desista.", fr: "N'abandonnez jamais." },
-            { pt: "Tente outra vez.", fr: "Essayez encore." },
-            { pt: "Eu acredito em mim.", fr: "Je crois en moi." },
-            { pt: "O sucesso exige esforço.", fr: "Le succès demande des efforts." },
-            { pt: "O trabalho duro compensa.", fr: "Le travail acharné paie." },
-            { pt: "Eu foco no meu objetivo.", fr: "Je me concentre sur mon objectif." },
-            { pt: "Cada dia é um novo aprendizado.", fr: "Chaque jour est un nouvel apprentissage." },
-            { pt: "Eu consigo fazer isso.", fr: "Je peux le faire." },
-            { pt: "Estou progredindo rápido.", fr: "Je progresse rapidement." },
-            { pt: "Minha memória está melhorando.", fr: "Ma mémoire s'améliore." },
-            { pt: "Aprender francês é divertido.", fr: "Apprendre le français est amusant." },
-            { pt: "Eu domino a pronúncia.", fr: "Je maîtrise la prononciation." },
-            { pt: "Pratico todos os dias.", fr: "Je pratique tous les jours." },
-            { pt: "Ouço e repito.", fr: "J'écoute et je répète." },
-            { pt: "Meu vocabulário está crescendo.", fr: "Mon vocabulaire s'agrandit." },
-            { pt: "Estou construindo meu futuro.", fr: "Je construis mon avenir." },
-            { pt: "Grandes mudanças estão chegando.", fr: "De grands changements arrivent." },
-            { pt: "Eu estou preparado para o desafio.", fr: "Je suis prêt pour le défi." },
-            { pt: "A jornada é longa mas vale a pena.", fr: "Le voyage est long mais ça vaut le coup." },
-            { pt: "Sou forte e determinado.", fr: "Je suis fort et déterminé." },
-            { pt: "Obrigado por tudo.", fr: "Merci pour tout." },
-            { pt: "Até logo, meu amigo.", fr: "À bientôt, mon ami." },
-            { pt: "Até a vitória!", fr: "Vers la victoire !" }
+            { pt: "Bom dia, como você está?", fr: "Bonjour, comment ça va ?", fonetica: "Bon-jôur, com-mon sá va?" },
+            { pt: "Eu gostaria de um café, por favor.", fr: "Je voudrais un café, s'il vous plaît.", fonetica: "J'vudrê un ca-fé, si vu plê?" },
+            { pt: "Muito obrigado pela ajuda.", fr: "Merci beaucoup pour votre aide.", fonetica: "Mér-ci bo-cú pur vot r-êd." },
+            { pt: "Onde fica a estação de metrô?", fr: "Où se trouve la station de métro ?", fonetica: "U se truv la sta-sion de mé-tro?" },
+            { pt: "Eu não entendo francês muito bem.", fr: "Je ne comprends pas très bien le français.", fonetica: "J'n-com-pren pa trê bien le fron-sê." },
+            { pt: "Você pode falar mais devagar?", fr: "Pouvez-vous parler plus lentement ?", fonetica: "Pu-vé vu par-lé plu lon-tman?" },
+            { pt: "Quanto custa este item?", fr: "Combien ça coûte ?", fonetica: "Com-bien sa cut?" },
+            { pt: "Eu sou do Brasil.", fr: "Je viens du Brésil.", fonetica: "Je vien du Brési." },
+            { pt: "Prazer em conhecê-lo.", fr: "Enchanté de faire votre connaissance.", fonetica: "On-shon-té de fêr vot con-ê-sans." },
+            { pt: "Até logo, tenha um bom dia!", fr: "À bientôt, passez une bonne journée !", fonetica: "A bien-tô, pa-sé in bon jurnê!" },
+            { pt: "Onde fica o banheiro?", fr: "Où sont les toilettes ?", fonetica: "U son lê tualet?" },
+            { pt: "Eu preciso de ajuda.", fr: "J'ai besoin d'aide.", fonetica: "Jê be-zoin d-êd." },
+            { pt: "Desculpe pelo incômodo.", fr: "Désolé pour le dérangement.", fonetica: "Dé-zo-lé pur le dé-ron-jman." },
+            { pt: "Sim, por favor.", fr: "Oui, s'il vous plaît.", fonetica: "Ui, si vu plê." },
+            { pt: "Não, obrigado.", fr: "Non, merci.", fonetica: "Non, mér-ci." },
+            { pt: "Eu não sei.", fr: "Je ne sais pas.", fonetica: "Jé-pa (J'sais pas)" },
+            { pt: "Você fala inglês?", fr: "Parlez-vous anglais ?", fonetica: "Par-lé vu on-glê?" },
+            { pt: "Eu estou aprendendo francês.", fr: "J'apprends le français.", fonetica: "J-ap-ron le fron-sê." },
+            { pt: "O tempo está ótimo hoje.", fr: "Il fait très beau aujourd'hui.", fonetica: "Il fê trê bô o-jur-d-ui." },
+            { pt: "Está chovendo muito.", fr: "Il pleut beaucoup.", fonetica: "Il pleu bo-cú." },
+            { pt: "Qual é o seu nome?", fr: "Comment vous appelez-vous ?", fonetica: "Com-mon vu za-pé-lé-vu?" },
+            { pt: "Meu nome é...", fr: "Je m'appelle...", fonetica: "Je ma-pêl..." },
+            { pt: "Onde você mora?", fr: "Où habitez-vous ?", fonetica: "U a-bi-té-vu?" },
+            { pt: "Eu moro em Curitiba.", fr: "J'habite à Curitiba.", fonetica: "J-a-bit a Cu-ri-ti-ba." },
+            { pt: "O que você faz da vida?", fr: "Que faites-vous dans la vie ?", fonetica: "Ke fêt-vu don la vi?" },
+            { pt: "Eu sou motorista.", fr: "Je suis chauffeur.", fonetica: "Je sui chô-fêr." },
+            { pt: "Eu trabalho com máquinas pesadas.", fr: "Je travaille avec des machines lourdes.", fonetica: "Je tra-vay avêc dê ma-shin lur-d." },
+            { pt: "Tenho uma família maravilhosa.", fr: "J'ai une famille merveilleuse.", fonetica: "Jê in fa-mi-y mér-vê-yuz." },
+            { pt: "Nós vamos nos mudar em breve.", fr: "Nous allons bientôt déménager.", fonetica: "Nu a-lon bien-tô dé-mé-na-jé." },
+            { pt: "Eu gosto de jogar videogame.", fr: "J'aime jouer aux jeux vidéo.", fonetica: "Jêm ju-é o jêu vi-dé-o." },
+            { pt: "Qual é a hora?", fr: "Quelle heure est-il ?", fonetica: "Kêl êr ê-til?" },
+            { pt: "São duas horas.", fr: "Il est deux heures.", fonetica: "Il ê du zêr." },
+            { pt: "Eu estou com fome.", fr: "J'ai faim.", fonetica: "Jê fain." },
+            { pt: "Eu estou com sede.", fr: "J'ai soif.", fonetica: "Jê suaf." },
+            { pt: "A comida está deliciosa.", fr: "La nourriture est délicieuse.", fonetica: "La nu-ri-tur ê dé-li-siuz." },
+            { pt: "A conta, por favor.", fr: "L'addition, s'il vous plaît.", fonetica: "La-di-sion, si vu plê." },
+            { pt: "Aceita cartão de crédito?", fr: "Aceprez-vous les cartes de crédit ?", fonetica: "Ac-sep-té-vu lê cart de cré-dit?" },
+            { pt: "Onde posso comprar um bilhete?", fr: "Où puis-je acheter un billet ?", fonetica: "U pui-j a-shé-té un bi-yêt?" },
+            { pt: "O trem está atrasado.", fr: "Le train est en retard.", fonetica: "Le train êt en re-tar." },
+            { pt: "Onde fica o hotel?", fr: "Où se trouve l'hôtel ?", fonetica: "U se truv lo-têl?" },
+            { pt: "Eu reservei um quarto.", fr: "J'ai réservé une chambre.", fonetica: "Jé ré-zer-vé in shon-br." },
+            { pt: "O Wi-Fi é gratuito?", fr: "Le Wi-Fi est-il gratuit ?", fonetica: "Le uai-fai êt-il gra-tui?" },
+            { pt: "Qual é a senha?", fr: "Quel est le mot de passe ?", fonetica: "Kêl ê le mo de pas?" },
+            { pt: "Minha bateria acabou.", fr: "Ma batterie est vide.", fonetica: "Ma ba-tri êt vid." },
+            { pt: "Você pode repetir?", fr: "Pouvez-vous répéter ?", fonetica: "Pu-vé vu ré-pé-té?" },
+            { pt: "Eu entendi.", fr: "J'ai compris.", fonetica: "Jé com-pri." },
+            { pt: "Eu não entendi nada.", fr: "Je n'ai rien compris." , fonetica: "Je n-ê rien com-pri." },
+            { pt: "Como se diz isso em francês?", fr: "Comment dit-on cela en français ?", fonetica: "Com-mon di-ton se-la on fron-sê?" },
+            { pt: "Tenha um bom dia!", fr: "Bonne journée !", fonetica: "Bon jurnê!" },
+            { pt: "Boa Noite!", fr: "Bonne nuit !", fonetica: "Bon n-ui!" },
+            { pt: "Até logo!", fr: "À plus tard !", fonetica: "A plu tar!" },
+            { pt: "Até amanhã!", fr: "À demain !", fonetica: "A de-man!" },
+            { pt: "Com licença.", fr: "Excusez-moi.", fonetica: "Ex-ku-zé-muá." },
+            { pt: "Com licença (passagem).", fr: "Pardon.", fonetica: "Par-don." },
+            { pt: "Tudo bem?", fr: "Ça va ?", fonetica: "Sa va?" },
+            { pt: "Tudo bem, e com você?", fr: "Ça va bien, et vous ?", fonetica: "Sa va bien, ê vu?" },
+            { pt: "Mais ou menos.", fr: "Comme ci, comme ça.", fonetica: "Com-si, com-sa." },
+            { pt: "Até mais!", fr: "Salut !", fonetica: "Sa-lü!" },
+            { pt: "Bem-vindo!", fr: "Bienvenue !", fonetica: "Bien-vnu!" },
+            { pt: "Parabéns!", fr: "Félicitations !", fonetica: "Fé-li-ci-ta-sion!" },
+            { pt: "Boa sorte!", fr: "Bonne chance !", fonetica: "Bon shons!" },
+            { pt: "Cuidado!", fr: "Attention !", fonetica: "A-ton-sion!" },
+            { pt: "Pare!", fr: "Arrêtez !", fonetica: "A-ré-té!" },
+            { pt: "Venha aqui.", fr: "Venez ici.", fonetica: "Ve-né i-si." },
+            { pt: "Espere um momento.", fr: "Attendez un moment.", fonetica: "A-ten-dé un mo-mon." },
+            { pt: "Vamos lá!", fr: "Allons-y !", fonetica: "A-lon-zi!" },
+            { pt: "Estou pronto.", fr: "Je suis prêt.", fonetica: "Je sui prê." },
+            { pt: "Está certo.", fr: "C'est bon.", fonetica: "Sê bon." },
+            { pt: "Está errado.", fr: "C'est faux.", fonetica: "Sê fô." },
+            { pt: "Perfeito!", fr: "Parfait !", fonetica: "Par-fê!" },
+            { pt: "Excelente!", fr: "Excellent !", fonetica: "Ex-se-lon-t!" },
+            { pt: "Obrigado pelo seu tempo.", fr: "Merci pour votre temps.", fonetica: "Mér-ci pur vot ton." },
+            { pt: "Tenha uma boa viagem.", fr: "Bon voyage.", fonetica: "Bon voi-aj." },
+            { pt: "Até a próxima.", fr: "Jusqu'à la prochaine.", fonetica: "Jus-k a pro-shên." },
+            { pt: "Eu amo estudar idiomas.", fr: "J'adore étudier les langues.", fonetica: "J-a-dor é-tu-di-é lê long." },
+            { pt: "A prática leva à perfeição.", fr: "C'est en forgeant qu'on devient forgeron.", fonetica: "Sê ton for-jhon con devien for-jhon." },
+            { pt: "A vida é bela.", fr: "La vie est belle.", fonetica: "La vi êt bêl." },
+            { pt: "Nunca desista.", fr: "N'abandonnez jamais.", fonetica: "N-a-bon-né ja-mê." },
+            { pt: "Tente outra vez.", fr: "Essayez encore.", fonetica: "E-sé-yé on-cor." },
+            { pt: "Eu acredito em mim.", fr: "Je crois en moi.", fonetica: "Je crua on muá." },
+            { pt: "O sucesso exige esforço.", fr: "Le succès demande des efforts.", fonetica: "Le suc-sês de-mand dê e-for." },
+            { pt: "O trabalho duro compensa.", fr: "Le travail acharné paie.", fonetica: "Le tra-vay a-shar-né pê." },
+            { pt: "Eu foco no meu objetivo.", fr: "Je me concentre sur mon objectif.", fonetica: "Je me con-son-tr sur mon ob-jék-tif." },
+            { pt: "Cada dia é um novo aprendizado.", fr: "Chaque jour est un nouvel apprentissage.", fonetica: "Shak jhur êt un nu-vêl a-pron-ti-saj." },
+            { pt: "Eu consigo fazer isso.", fr: "Je peux le faire.", fonetica: "Je peu le fêr." },
+            { pt: "Estou progredindo rápido.", fr: "Je progresse rapidement.", fonetica: "Je pro-grês ra-pid-mon." },
+            { pt: "Minha memória está melhorando.", fr: "Ma mémoire s'améliore.", fonetica: "Ma mé-muar s-a-mé-lior." },
+            { pt: "Aprender francês é divertido.", fr: "Apprendre le français est amusant.", fonetica: "A-pron-dr le fron-sê êt a-mu-zon." },
+            { pt: "Eu domino a pronúncia.", fr: "Je maîtrise la prononciation.", fonetica: "Je mê-triz la pro-non-sia-sion." },
+            { pt: "Pratico todos os dias.", fr: "Je pratique tous les jours.", fonetica: "Je pra-tik tu lê jhur." },
+            { pt: "Ouço e repito.", fr: "J'écoute et je répète.", fonetica: "J-e-cut ê je ré-pêt." },
+            { pt: "Meu vocabulário está crescendo.", fr: "Mon vocabulaire s'agrandit.", fonetica: "Mon vo-ca-bü-la-r s-a-gron-di." },
+            { pt: "Estou construindo meu futuro.", fr: "Je construis mon avenir.", fonetica: "Je con-strui mon a-v-nir." },
+            { pt: "Grandes mudanças estão chegando.", fr: "De grands changements arrivent.", fonetica: "De gron shon-jman a-riv." },
+            { pt: "Eu estou preparado para o desafio.", fr: "Je suis prêt pour le défi.", fonetica: "Je sui prê pur le dé-fi." },
+            { pt: "A jornada é longa mas vale a pena.", fr: "Le voyage est long mais ça vaut le coup.", fonetica: "Le voi-aj êt lon mê sa vô le cu." },
+            { pt: "Sou forte e determinado.", fr: "Je suis fort et déterminé.", fonetica: "Je sui for ê dé-têr-mi-né." },
+            { pt: "Obrigado por tudo.", fr: "Merci pour tout.", fonetica: "Mér-ci pur tu." },
+            { pt: "Até logo, meu amigo.", fr: "À bientôt, mon ami.", fonetica: "A bien-tô, mon a-mi." },
+            { pt: "Até a vitória!", fr: "Vers la victoire !", fonetica: "Vêr la vic-tua-r!" }
         ];
 
         let atual = 0;
@@ -153,6 +155,7 @@
             document.getElementById("counter").innerText = `Frase ${atual + 1} / ${frases.length}`;
             document.getElementById("phrase-pt").innerText = frases[atual].pt;
             document.getElementById("phrase-fr").innerText = frases[atual].fr;
+            document.getElementById("phrase-fonetica").innerText = frases[atual].fonetica;
             document.getElementById("feedback").innerText = "";
         }
 
@@ -163,10 +166,18 @@
         }
 
         function ouvirAudio() {
-            const texto = new SpeechSynthesisUtterance(frases[atual].fr);
-            texto.lang = "fr-FR";
-            texto.rate = velocidadeAtual;
-            window.speechSynthesis.speak(texto);
+            const texto1 = new SpeechSynthesisUtterance(frases[atual].fr);
+            texto1.lang = "fr-FR";
+            texto1.rate = velocidadeAtual;
+            
+            texto1.onend = function() {
+                const texto2 = new SpeechSynthesisUtterance(frases[atual].fr);
+                texto2.lang = "fr-FR";
+                texto2.rate = velocidadeAtual;
+                window.speechSynthesis.speak(texto2);
+            };
+
+            window.speechSynthesis.speak(texto1);
         }
 
         function falarFrase() {
